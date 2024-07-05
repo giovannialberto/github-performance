@@ -1,9 +1,10 @@
 import sqlite3
 from datetime import datetime
+import os
 
 class DatabaseManager:
-    def __init__(self, db_name='branch_tracking.db'):
-        self.db_name = db_name
+    def __init__(self, db_name=None):
+        self.db_name = db_name or os.getenv('DB_FILE_PATH', '/app/data/branch_tracking.db') 
         self.conn = None
         self.cursor = None
         self.setup_database()

@@ -29,16 +29,72 @@ def index():
 
     # Create separate Plotly figures for each metric
     fig1 = go.Figure(data=[go.Scatter(x=timestamps, y=open_branches, mode='lines', name='Open Branches')])
-    fig1.update_layout(title='Open Branches Over Time', xaxis_title='Date', yaxis_title='Number of Branches')
-
+    fig1.update_layout(
+        title='Open Branches Over Time',
+        xaxis_title='Date',
+        yaxis_title='Number of Branches',
+        annotations=[
+            dict(
+                x=0,  # Adjust x and y coordinates as needed for optimal placement
+                y=1.05,
+                xref='paper',
+                yref='paper',
+                text='This graph shows the number of branches that were not yet merged on each day.',
+                showarrow=False,
+            )
+        ]
+    )
+   
     fig2 = go.Figure(data=[go.Scatter(x=timestamps, y=avg_branch_lifetimes, mode='lines', name='Avg Branch Lifetime')])
-    fig2.update_layout(title='Average Branch Lifetime Over Time', xaxis_title='Date', yaxis_title='Days')
+    fig2.update_layout(
+        title='Average Branch Lifetime Over Time',
+        xaxis_title='Date',
+        yaxis_title='Days',
+        annotations=[
+            dict(
+                x=0,
+                y=1.05,
+                xref='paper',
+                yref='paper',
+                text='This graph shows the average time (in days) it took for branches to be merged, calculated for branches merged on each day.',
+                showarrow=False,
+            )
+        ]
+    )
 
     fig3 = go.Figure(data=[go.Scatter(x=timestamps, y=avg_pr_lifetimes, mode='lines', name='Avg PR Lifetime')])
-    fig3.update_layout(title='Average PR Lifetime Over Time', xaxis_title='Date', yaxis_title='Days')
+    fig3.update_layout(
+        title='Average Pull Request Lifetime Over Time',
+        xaxis_title='Date',
+        yaxis_title='Days',
+        annotations=[
+            dict(
+                x=0,
+                y=1.05,
+                xref='paper',
+                yref='paper',
+                text='This graph shows the average time (in days) between a pull request being opened and merged, calculated for PRs merged on each day.',
+                showarrow=False,
+            )
+        ]
+    )
 
     fig4 = go.Figure(data=[go.Scatter(x=timestamps, y=avg_branch_pr_gaps, mode='lines', name='Avg Branch-PR Gap')])
-    fig4.update_layout(title='Average Branch-PR Gap Over Time', xaxis_title='Date', yaxis_title='Days')
+    fig4.update_layout(
+        title='Average Time Between Branch Creation and PR Opening',
+        xaxis_title='Date',
+        yaxis_title='Days',
+        annotations=[
+            dict(
+                x=0,
+                y=1.05,
+                xref='paper',
+                yref='paper',
+                text='This graph shows the average time (in days) between a branch being created and its associated pull request being opened, calculated for branches created and PRs opened on each day.',
+                showarrow=False,
+            )
+        ]
+    )
 
     # Convert figures to JSON for rendering in HTML
     graphJSON1 = fig1.to_json()

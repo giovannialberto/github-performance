@@ -2,25 +2,24 @@ version: '3.8'
 
 services:
   data-collector:
-    build: 
-      .
-    environment:
-      - PYTHONPATH=/app/src
-    volumes:
-      - ./config.yaml:/app/config.yaml
-      - ./data:/app/data # Volume for persisting the database
+    build: .
     env_file:
       - .env
-
+    volumes:
+      - ./data:/app/data  # This mounts the local ./data directory to /app/data in the container
+    
   dashboard:
     build:
       context: .
-      dockerfile: Dockerfile.dashboard  # Separate Dockerfile for the dashboard (see below)
+      dockerfile: Dockerfile.dashboard  
     ports:
-      - "8080:8080"  # Expose port 8080
+      - "8080:8080"
     volumes:
-      - ./data:/app/data # Share the database volume
+      - ./data:/app/data  # Make sure both containers share the same volume
     depends_on:
       - data-collector
     env_file:
       - .env
+
+volumes:
+  data:  # Named volume definition 
