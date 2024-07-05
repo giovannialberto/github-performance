@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div id="chart1"></div>
+    <div id="chart2"></div>
+    <div id="chart3"></div>
+    <div id="chart4"></div>
+    <script>
+        var graphs = [
+            {{ graphJSON1 | safe }}, 
+            {{ graphJSON2 | safe }},
+            {{ graphJSON3 | safe }},
+            {{ graphJSON4 | safe }}
+        ];
+        for (let i = 0; i < graphs.length; i++) {
+            Plotly.plot('chart' + (i + 1), graphs[i], {});
+        }
+    </script>
+</body>
+</html>
