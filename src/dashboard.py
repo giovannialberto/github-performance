@@ -1,14 +1,59 @@
 from datetime import datetime, timedelta
 import pandas as pd
 import plotly.graph_objects as go
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, request, flash
 from database.database import DatabaseManager
 from database.stats import StatsCalculator
-    
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
+
 app = Flask(__name__, template_folder='templates')
+app.secret_key = os.getenv('SECRET_KEY')  # Use secret key from environment variable
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# In-memory user storage
+users = {'admin': generate_password_hash(os.getenv('ADMIN_PASSWORD'))}  # Use password from environment variable
+
+class User(UserMixin):
+    def __init__(self, username):
+        self.id = username
+
+@login_manager.user_loader
+def load_user(username):
+    if username not in users:
+        return None
+    return User(username)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username in users and check_password_hash(users[username], password):
+            login_user(User(username))
+            return redirect(url_for('dashboard'))
+        flash('Invalid username or password')
+    return render_template('login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
 
 @app.route('/')
-def index():
+@login_required
+def dashboard():
     db_manager = DatabaseManager()
     stats_calculator = StatsCalculator(db_manager)
 
