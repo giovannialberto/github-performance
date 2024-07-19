@@ -5,10 +5,13 @@ import os
 from utils.utils import generate_hash
 from database.database import DatabaseManager
 from github.github import GitHubManager
+import boto3
+import json
 
 # Load environment variables from .env file
 load_dotenv()
 
+AWS_DEPLOY = os.getenv('AWS_DEPLOY', 'false')
 # GitHub repository details
 ORG_NAME = os.getenv('ORG_NAME')
 REPOSITORIES = os.getenv('REPOSITORIES').split(',')  # Split the comma-separated string into a list
@@ -97,13 +100,31 @@ def fetch_and_save_deleted_branch_details(db_manager, github_manager, branch_nam
     if stored_hash != details_hash:
         db_manager.update_branch_details(branch_name, repo_name, pr_opened_at, merger, merged_at, reviewers_str, details_hash)
 
+def aws_fetch_github_token():
+    secret_arn = os.environ["SECRET_ARN"]
+    aws_region = os.environ["AWS_REGION"]
+    secret_manager = boto3.client("secretsmanager", region_name=aws_region)
+    response = secret_manager.get_secret_value(SecretId=secret_arn)
+    secret = json.loads(response["SecretString"])
+    GITHUB_TOKEN = secret["GITHUB_TOKEN"]
+
+    return GITHUB_TOKEN
+
+def fetch_github_data(db_manager, REPOSITORIES, ORG_NAME, GITHUB_TOKEN):
+    for repo_name in REPOSITORIES:
+        update_db(db_manager, ORG_NAME, repo_name, GITHUB_TOKEN)
+    db_manager.fetch_all_branches()
+
 def main():
     db_manager = DatabaseManager()
-    while True:
-        for repo_name in REPOSITORIES:
-            update_db(db_manager, ORG_NAME, repo_name, GITHUB_TOKEN)
-        db_manager.fetch_all_branches()
-        time.sleep(3600)  # Run every hour
+
+    if AWS_DEPLOY:
+        GITHUB_TOKEN=aws_fetch_github_token()
+        fetch_github_data(db_manager, REPOSITORIES, ORG_NAME, GITHUB_TOKEN)
+    else:
+        while True:
+            fetch_github_data(db_manager, REPOSITORIES, ORG_NAME, GITHUB_TOKEN)
+            time.sleep(3600)  # Run every hour
 
 if __name__ == "__main__":
     main()
