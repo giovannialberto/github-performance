@@ -34,6 +34,7 @@ The project consists of two main components:
 2.  **Set up environment variables:**
     - Copy the `.env.example` file to `.env`.
     - Fill in the values for `GITHUB_TOKEN` (your GitHub Personal Access Token), `ORG_NAME` (your GitHub organization name), and `REPOSITORIES` (a comma-separated list of the repositories you want to track).
+    - Add the values for `SECRET_KEY` (a secret key for Flask sessions) and `ADMIN_PASSWORD` (password for the admin user).
 
 3.  **Start the application:**
     ```bash
